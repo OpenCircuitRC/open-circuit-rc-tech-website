@@ -1,0 +1,8 @@
+name = "open-circuit-rc-tech-website"
+main = "worker.js"
+compatibility_date = "2026-08-31"
+
+[assets]
+directory = "./public"
+
+build = { command = "" }
