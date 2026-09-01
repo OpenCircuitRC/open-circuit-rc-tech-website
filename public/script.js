@@ -35,11 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
-
-  const facebookUrl = (window.SITE_CONFIG && window.SITE_CONFIG.facebookUrl) ||
-    "https://www.facebook.com/OpenCircuitRCTech";
-
-  ["nav-facebook", "footer-facebook"].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.href = facebookUrl;
@@ -48,3 +43,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+
+// Social navigation destinations
+(() => {
+  const socialLinks = {
+    "nav-youtube": "https://www.youtube.com/@OpenCircuitRC",
+    "nav-facebook": "https://www.facebook.com/OpenCircuitRCTech"
+  };
+  Object.entries(socialLinks).forEach(([id, href]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.href = href;
+      el.target = "_blank";
+      el.rel = "noopener noreferrer";
+    }
+  });
+})();
