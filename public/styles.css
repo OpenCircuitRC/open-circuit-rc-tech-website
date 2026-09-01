@@ -460,3 +460,48 @@ a{color:inherit;text-decoration:none}
 #footer-facebook:hover{
   color:var(--orange);
 }
+
+
+/* Upper-right social icons */
+.nav-social{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  margin-left:-18px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.34);
+  color:#f2f2f2;
+  transition:transform .2s ease, color .2s ease, border-color .2s ease, background .2s ease;
+}
+.nav-social svg{
+  width:18px;
+  height:18px;
+  fill:currentColor;
+  display:block;
+}
+.nav-social:hover{
+  color:var(--orange);
+  border-color:rgba(255,106,0,.55);
+  background:rgba(255,106,0,.08);
+  transform:translateY(-2px);
+}
+#nav-youtube.nav-social,
+#nav-facebook.nav-social{
+  opacity:1;
+  font-size:0;
+  letter-spacing:0;
+  text-transform:none;
+}
+@media(max-width:900px){
+  .nav-social{
+    margin-left:0;
+    width:auto;
+    height:auto;
+    justify-content:flex-start;
+    border:0;
+    background:transparent;
+  }
+  .nav-social svg{width:20px;height:20px}
+}
