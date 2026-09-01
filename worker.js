@@ -1,43 +1,99 @@
 const CHANNEL_ID = "UC-fU_-yuEwnVY7F-mVAfO6w";
 
-function readTag(entry, tag) {
-  const match = entry.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
-  return match ? match[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "";
-}
+const YOUTUBE_API = "https://www.youtube.com/youtubei/v1/browse";
 
 async function getVideos() {
-  const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
-  const response = await fetch(feedUrl, {
-    headers: { "User-Agent": "OpenCircuit-RC-Tech-Website/1.0" },
-    cf: { cacheTtl: 300, cacheEverything: true }
+  const response = await fetch(YOUTUBE_API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Origin": "https://www.youtube.com",
+      "User-Agent": "Mozilla/5.0"
+    },
+    body: JSON.stringify({
+      context: {
+        client: {
+          clientName: "WEB",
+          clientVersion: "2.20260831.01.00",
+          hl: "en",
+          gl: "US"
+        }
+      },
+      browseId: CHANNEL_ID
+    })
   });
 
   if (!response.ok) {
-    throw new Error(`YouTube feed returned HTTP ${response.status}`);
+    throw new Error(`YouTube browse returned HTTP ${response.status}`);
   }
 
-  const xml = await response.text();
-  const entries = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)];
+  const data = await response.json();
+  const videos = [];
 
-  const videos = entries.map(([, entry]) => {
-    const id = readTag(entry, "yt:videoId");
-    const title = readTag(entry, "title");
-    const published = readTag(entry, "published");
-    const updated = readTag(entry, "updated");
-    const linkMatch = entry.match(/<link[^>]+rel="alternate"[^>]+href="([^"]+)"/);
+  function walk(value) {
+    if (!value || typeof value !== "object") return;
 
-    return {
-      id,
+    if (value.videoRenderer) {
+      addVideo(value.videoRenderer);
+    }
+
+    if (value.gridVideoRenderer) {
+      addVideo(value.gridVideoRenderer);
+    }
+
+    if (value.richItemRenderer?.content?.videoRenderer) {
+      addVideo(value.richItemRenderer.content.videoRenderer);
+    }
+
+    for (const key of Object.keys(value)) {
+      walk(value[key]);
+    }
+  }
+
+  function getText(value) {
+    if (!value) return "";
+
+    if (typeof value.simpleText === "string") {
+      return value.simpleText;
+    }
+
+    if (Array.isArray(value.runs)) {
+      return value.runs.map(run => run.text || "").join("");
+    }
+
+    return "";
+  }
+
+  function addVideo(video) {
+    if (!video?.videoId) return;
+
+    if (videos.some(v => v.id === video.videoId)) {
+      return;
+    }
+
+    const title = getText(video.title);
+
+    if (!title) return;
+
+    const publishedText =
+      getText(video.publishedTimeText) ||
+      getText(video.publishedTime);
+
+    videos.push({
+      id: video.videoId,
       title,
-      published,
-      updated,
-      url: linkMatch?.[1] || `https://www.youtube.com/watch?v=${id}`,
-      thumbnail: id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : ""
-    };
-  }).filter(v => v.id && v.title);
+      published: publishedText,
+      updated: publishedText,
+      url: `https://www.youtube.com/watch?v=${video.videoId}`,
+      thumbnail:
+        video.thumbnail?.thumbnails?.at(-1)?.url ||
+        `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`
+    });
+  }
 
-  videos.sort((a, b) => new Date(b.published || b.updated || 0) - new Date(a.published || a.updated || 0));
-  return videos;
+  walk(data);
+
+  return videos.slice(0, 30);
 }
 
 export default {
@@ -47,13 +103,21 @@ export default {
     if (url.pathname === "/api/videos") {
       try {
         const videos = await getVideos();
+
         return Response.json(
           { videos },
-          { headers: { "Cache-Control": "public, max-age=300" } }
+          {
+            headers: {
+              "Cache-Control": "public, max-age=300"
+            }
+          }
         );
       } catch (error) {
         return Response.json(
-          { error: "Unable to read YouTube feed.", details: String(error?.message || error) },
+          {
+            error: "Unable to read YouTube videos.",
+            details: String(error?.message || error)
+          },
           { status: 502 }
         );
       }
