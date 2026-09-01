@@ -2,6 +2,9 @@ name = "open-circuit-rc-tech-website"
 main = "worker.js"
 compatibility_date = "2026-08-31"
 
+[[kv_namespaces]]
+binding = "VISITS"
+
 [assets]
 directory = "./public"
 

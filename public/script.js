@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const open = nav.classList.toggle("open");
       toggle.setAttribute("aria-expanded", String(open));
     });
+
     nav.querySelectorAll("a").forEach(link => {
       link.addEventListener("click", () => {
         nav.classList.remove("open");
@@ -35,22 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
-    const el = document.getElementById(id);
-    if (el) {
-      el.href = facebookUrl;
-      el.target = "_blank";
-      el.rel = "noopener";
-    }
-  });
-});
 
-
-// Social navigation destinations
-(() => {
   const socialLinks = {
     "nav-youtube": "https://www.youtube.com/@OpenCircuitRC",
     "nav-facebook": "https://www.facebook.com/OpenCircuitRCTech"
   };
+
   Object.entries(socialLinks).forEach(([id, href]) => {
     const el = document.getElementById(id);
     if (el) {
@@ -59,4 +50,21 @@ document.addEventListener("DOMContentLoaded", () => {
       el.rel = "noopener noreferrer";
     }
   });
-})();
+
+  const visitorCount = document.getElementById("visitor-count");
+  if (visitorCount) {
+    fetch("/api/visit", { cache: "no-store" })
+      .then(response => {
+        if (!response.ok) throw new Error("Visitor counter unavailable");
+        return response.json();
+      })
+      .then(data => {
+        if (Number.isFinite(data.visits)) {
+          visitorCount.textContent = Math.max(0, Math.floor(data.visits)).toString().padStart(6, "0");
+        }
+      })
+      .catch(() => {
+        visitorCount.textContent = "—";
+      });
+  }
+});

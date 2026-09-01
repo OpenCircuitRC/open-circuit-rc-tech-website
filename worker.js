@@ -51,6 +51,24 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
 
+    if (url.pathname === "/api/visit" && request.method === "GET") {
+      try {
+        const current = parseInt(await env.VISITS.get("total"), 10) || 0;
+        const total = current + 1;
+        await env.VISITS.put("total", String(total));
+
+        return Response.json(
+          { visits: total },
+          { headers: { "Cache-Control": "no-store" } }
+        );
+      } catch (error) {
+        return Response.json(
+          { error: "Unable to update visitor counter." },
+          { status: 503, headers: { "Cache-Control": "no-store" } }
+        );
+      }
+    }
+
     if (url.pathname === "/api/videos") {
       try {
         const videos = await getVideos();
