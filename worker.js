@@ -44,6 +44,13 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // Canonicalize the site to the root domain.
+    // Keep the path and query string intact.
+    if (url.hostname === "www.opencircuitrc.com") {
+      url.hostname = "opencircuitrc.com";
+      return Response.redirect(url.toString(), 301);
+    }
+
     if (url.pathname === "/api/videos") {
       try {
         const videos = await getVideos();
