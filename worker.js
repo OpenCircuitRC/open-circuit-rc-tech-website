@@ -1,118 +1,43 @@
 const CHANNEL_ID = "UC-fU_-yuEwnVY7F-mVAfO6w";
 
-const YOUTUBE_BROWSE = "https://www.youtube.com/youtubei/v1/browse";
-
-const VIDEO_PARAMS = "EgZ2aWRlb3MYASAAMAE=";
-
-function getText(value) {
-  if (!value) return "";
-
-  if (typeof value.simpleText === "string") {
-    return value.simpleText;
-  }
-
-  if (Array.isArray(value.runs)) {
-    return value.runs.map(run => run.text || "").join("");
-  }
-
-  return "";
-}
-
-function findVideos(value, videos) {
-  if (!value || typeof value !== "object") return;
-
-  if (value.gridVideoRenderer) {
-    const video = value.gridVideoRenderer;
-
-    if (video.videoId && !videos.some(v => v.id === video.videoId)) {
-      const title = getText(video.title);
-
-      if (title) {
-        videos.push({
-          id: video.videoId,
-          title,
-          published: getText(video.publishedTimeText),
-          updated: getText(video.publishedTimeText),
-          url: `https://www.youtube.com/watch?v=${video.videoId}`,
-          thumbnail:
-            video.thumbnail?.thumbnails?.at(-1)?.url ||
-            `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`
-        });
-      }
-    }
-  }
-
-  if (value.videoRenderer) {
-    const video = value.videoRenderer;
-
-    if (video.videoId && !videos.some(v => v.id === video.videoId)) {
-      const title = getText(video.title);
-
-      if (title) {
-        videos.push({
-          id: video.videoId,
-          title,
-          published: getText(video.publishedTimeText),
-          updated: getText(video.publishedTimeText),
-          url: `https://www.youtube.com/watch?v=${video.videoId}`,
-          thumbnail:
-            video.thumbnail?.thumbnails?.at(-1)?.url ||
-            `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`
-        });
-      }
-    }
-  }
-
-  if (value.richItemRenderer?.content?.videoRenderer) {
-    findVideos(
-      value.richItemRenderer.content.videoRenderer,
-      videos
-    );
-  }
-
-  for (const key of Object.keys(value)) {
-    findVideos(value[key], videos);
-  }
+function readTag(entry, tag) {
+  const match = entry.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
+  return match ? match[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "";
 }
 
 async function getVideos() {
-  const response = await fetch(YOUTUBE_BROWSE, {
-    method: "POST",
-
-    headers: {
-      "Content-Type": "application/json",
-      "User-Agent": "Mozilla/5.0"
-    },
-
-    body: JSON.stringify({
-      context: {
-        client: {
-          clientName: "WEB",
-          clientVersion: "2.20260831.01.00",
-          hl: "en",
-          gl: "US"
-        }
-      },
-
-      browseId: CHANNEL_ID,
-
-      params: VIDEO_PARAMS
-    })
+  const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
+  const response = await fetch(feedUrl, {
+    headers: { "User-Agent": "OpenCircuit-RC-Tech-Website/1.0" },
+    cf: { cacheTtl: 300, cacheEverything: true }
   });
 
   if (!response.ok) {
-    throw new Error(
-      `YouTube browse returned HTTP ${response.status}`
-    );
+    throw new Error(`YouTube feed returned HTTP ${response.status}`);
   }
 
-  const data = await response.json();
+  const xml = await response.text();
+  const entries = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)];
 
-  const videos = [];
+  const videos = entries.map(([, entry]) => {
+    const id = readTag(entry, "yt:videoId");
+    const title = readTag(entry, "title");
+    const published = readTag(entry, "published");
+    const updated = readTag(entry, "updated");
+    const linkMatch = entry.match(/<link[^>]+rel="alternate"[^>]+href="([^"]+)"/);
 
-  findVideos(data, videos);
+    return {
+      id,
+      title,
+      published,
+      updated,
+      url: linkMatch?.[1] || `https://www.youtube.com/watch?v=${id}`,
+      thumbnail: id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : ""
+    };
+  }).filter(v => v.id && v.title);
 
-  return videos.slice(0, 30);
+  videos.sort((a, b) => new Date(b.published || b.updated || 0) - new Date(a.published || a.updated || 0));
+  return videos;
 }
 
 export default {
@@ -122,21 +47,13 @@ export default {
     if (url.pathname === "/api/videos") {
       try {
         const videos = await getVideos();
-
         return Response.json(
           { videos },
-          {
-            headers: {
-              "Cache-Control": "public, max-age=300"
-            }
-          }
+          { headers: { "Cache-Control": "public, max-age=300" } }
         );
       } catch (error) {
         return Response.json(
-          {
-            error: "Unable to read YouTube videos.",
-            details: String(error?.message || error)
-          },
+          { error: "Unable to read YouTube feed.", details: String(error?.message || error) },
           { status: 502 }
         );
       }

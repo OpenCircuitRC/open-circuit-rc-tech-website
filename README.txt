@@ -1,10 +1,7 @@
-# Open Circuit RC & Tech Website - Worker deployment
+# Open Circuit RC & Tech Website
 
-This version uses a Cloudflare Worker with Static Assets.
+The homepage uses the supplied Open Circuit RC & Tech branding and category images.
 
-- `worker.js` handles `/api/videos` directly.
-- `public/` contains the website files.
-- No Cloudflare Pages `functions/` directory is required.
-- No YouTube Data API key is required.
+Pick Your Lane cards link directly to the supplied RC Cars, RC Boats, Drones, and Tech YouTube playlists.
 
-Deploy with `npx wrangler deploy`.
+The Latest Videos section has been removed.
