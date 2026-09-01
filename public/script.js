@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cfg = window.SITE_CONFIG || {};
   const youtubeUrl = cfg.youtubeUrl || "https://www.youtube.com/channel/UC-fU_-yuEwnVY7F-mVAfO6w";
 
-  ["nav-youtube", "hero-youtube", "shorts-youtube", "subscribe-youtube", "footer-youtube"].forEach(id => {
+  ["nav-youtube", "hero-youtube", "subscribe-youtube", "footer-youtube"].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.href = youtubeUrl;
@@ -10,6 +10,13 @@ document.addEventListener("DOMContentLoaded", () => {
       el.rel = "noopener";
     }
   });
+
+  const shortsEl = document.getElementById("shorts-youtube");
+  if (shortsEl) {
+    shortsEl.href = "https://www.youtube.com/@OpenCircuitRC/shorts";
+    shortsEl.target = "_blank";
+    shortsEl.rel = "noopener";
+  }
 
   const year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
