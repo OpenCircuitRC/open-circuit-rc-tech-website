@@ -1,7 +1,17 @@
 # Open Circuit RC & Tech Website
 
-The homepage uses the supplied Open Circuit RC & Tech branding and category images.
+This build removes the Latest Videos section and uses four image-based playlist cards under Pick Your Lane.
 
-Pick Your Lane cards link directly to the supplied RC Cars, RC Boats, Drones, and Tech YouTube playlists.
+RC Cars links to the supplied playlist:
+https://youtube.com/playlist?list=PLWqyClkpN5Id-Te_dRlWJwCGYRPzIQeam&si=AeBLQoWkZpQ6Y5HM
 
-The Latest Videos section has been removed.
+RC Boats, Drones, and Tech currently link to the channel Playlists page until their individual playlist URLs are supplied.
+
+The project uses the Cloudflare Worker/static-assets structure:
+- worker.js
+- wrangler.toml
+- public/index.html
+- public/styles.css
+- public/script.js
+- public/site-config.js
+- public/assets/
