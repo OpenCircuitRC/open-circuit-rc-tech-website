@@ -35,4 +35,16 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  const facebookUrl = (window.SITE_CONFIG && window.SITE_CONFIG.facebookUrl) ||
+    "https://www.facebook.com/OpenCircuitRCTech";
+
+  ["nav-facebook", "footer-facebook"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.href = facebookUrl;
+      el.target = "_blank";
+      el.rel = "noopener";
+    }
+  });
 });
