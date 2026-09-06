@@ -69,6 +69,37 @@ export default {
       }
     }
 
+    // Serve clean SEO URLs without relying on static-host rewrite behavior.
+    const cleanPages = {
+      "/tools": "/tools.html",
+      "/file-extension-changer": "/file-extension-changer.html",
+      "/rc-toolbox": "/rc-toolbox.html",
+      "/astro-sky-planner": "/astro-sky-planner.html",
+      "/simply-solitaire": "/simply-solitaire.html"
+    };
+
+    // Redirect legacy .html URLs to their clean canonical URLs.
+    const legacyRedirects = {
+      "/tools.html": "/tools",
+      "/apps.html": "/tools",
+      "/apps": "/tools",
+      "/file-extension-changer.html": "/file-extension-changer",
+      "/rc-toolbox.html": "/rc-toolbox",
+      "/astro-sky-planner.html": "/astro-sky-planner",
+      "/simply-solitaire.html": "/simply-solitaire"
+    };
+
+    if (legacyRedirects[url.pathname]) {
+      const target = new URL(legacyRedirects[url.pathname], request.url);
+      target.search = url.search;
+      return Response.redirect(target.toString(), 301);
+    }
+
+    if (cleanPages[url.pathname]) {
+      const assetUrl = new URL(cleanPages[url.pathname], request.url);
+      return env.ASSETS.fetch(new Request(assetUrl.toString(), request));
+    }
+
     if (url.pathname === "/api/videos") {
       try {
         const videos = await getVideos();
