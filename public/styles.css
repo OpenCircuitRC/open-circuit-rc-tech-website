@@ -598,6 +598,7 @@ a{color:inherit;text-decoration:none}
 .tool-card p{margin:0 0 20px;color:var(--muted);font-size:.9rem}
 .tool-preview{margin:4px 0 22px;padding:10px;background:#090909;border:1px solid var(--line);overflow:hidden}
 .tool-preview img{display:block;width:100%;max-width:430px;height:auto;margin:0 auto;border:1px solid #252525}
+.tool-preview-rc img{width:auto;max-width:100%;max-height:430px}
 .tool-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
 .tool-meta span{padding:5px 8px;background:#111;border:1px solid var(--line);color:#aaa;font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .tool-card .btn{width:max-content}
