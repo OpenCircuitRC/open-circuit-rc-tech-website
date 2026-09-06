@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://opencircuitrc.com/</loc></url>
-  <url><loc>https://opencircuitrc.com/tools.html</loc></url>
-  <url><loc>https://opencircuitrc.com/apps.html</loc></url>
+  <url><loc>https://opencircuitrc.com/tools</loc></url>
+  <url><loc>https://opencircuitrc.com/file-extension-changer</loc></url>
+  <url><loc>https://opencircuitrc.com/rc-toolbox</loc></url>
+  <url><loc>https://opencircuitrc.com/astro-sky-planner</loc></url>
+  <url><loc>https://opencircuitrc.com/simply-solitaire</loc></url>
 </urlset>
